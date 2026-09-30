@@ -1,0 +1,10 @@
+# One-click deploy on Render: Dashboard > New > Blueprint > pick this repo.
+services:
+  - type: web
+    name: label-check
+    runtime: docker
+    plan: starter        # 0.5 CPU keeps checks within ~5 s. "free" works but is much slower and sleeps when idle.
+    healthCheckPath: /health
+    envVars:
+      - key: WEB_CONCURRENCY
+        value: "2"
