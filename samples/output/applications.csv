@@ -1,0 +1,13 @@
+filename,beverage_type,brand_name,class_type,alcohol_content,net_contents,bottler,country_of_origin,expected_result,scenario
+01_old_tom_compliant.png,spirits,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Bardstown, KY",,pass,The sample label from the brief. Everything matches.
+02_stones_throw_case.png,spirits,Stone's Throw,London Dry Gin,41.2%,1 L,,,pass,"Dave's case: label says STONE'S THROW, application says Stone's Throw. Treated as a match."
+03_vodka_wrong_abv.png,spirits,Northern Birch,Vodka,45% Alc./Vol.,750 mL,,,fail,"Application says 45%, label says 40%."
+04_rum_titlecase_warning.png,spirits,Cayo Azul,Aged Rum,40%,750 mL,,Dominican Republic,fail,Jenny's case: warning heading in title case instead of capitals.
+05_wine_reworded_warning.png,wine,Hollow Oak,Cabernet Sauvignon,13.5%,750 mL,,,fail,Warning statement reworded - must be word-for-word.
+06_old_tom_bad_photo.jpg,spirits,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Bardstown, KY",,pass or review,"Same compliant label, photographed at an angle with uneven light and glare."
+07_ipa_no_warning.png,beer,Riverbend Brewing,India Pale Ale,6.8%,12 fl oz,,,fail,No government warning on the label.
+08_bourbon_heading_not_bold.png,spirits,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Bardstown, KY",,review,"Warning wording is right, but the heading isn't bold. Flagged for a human."
+09_table_wine_no_abv.png,wine,Mesa Verde,Red Table Wine,,750 mL,,,pass,"Wine with no % stated: allowed because ""Table Wine"" is the designation (27 CFR 4.36)."
+10_lager_abv_abbreviation.png,beer,Harbor Light,Lager,4.8%,12 fl oz,,,fail,"Beer label uses ""ABV"", which TTB doesn't allow in the alcohol statement (27 CFR 7.65)."
+11_gin_missing_net_contents.png,spirits,Copper Fox,American Dry Gin,44%,,,,fail,"No net contents on the label. The application field was blank too, but it's still required."
+12_tequila_import_no_country.png,spirits,Sol de Agave,Tequila Blanco,40%,750 mL,,,fail,"Imported, but no country of origin statement on the label."
