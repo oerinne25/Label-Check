@@ -8,7 +8,15 @@ government health warning word for word, and returns a plain checklist:
 The agent always makes the final call. The tool handles the routine matching
 so agents can spend their time on the judgment calls.
 
-**Live demo:** _<add your deployed URL here>_
+**Live demo:** https://label-check-weim.onrender.com
+
+> **About the demo's speed:** the demo runs on Render's free tier, which gives
+> the app one-tenth of a CPU. Each check therefore takes several seconds
+> longer than it would on real hardware; on a full CPU core a label takes
+> about 1 second, well inside the 5-second target. If the first visit is
+> slow, the server is waking from sleep and will respond within about a
+> minute. Batch mode adapts to the server's size and retries automatically
+> if the server is briefly busy.
 
 ![Checklist result](docs/screenshot-result.png)
 

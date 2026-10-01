@@ -20,4 +20,6 @@ ENV OMP_THREAD_LIMIT=1 \
     PORT=8000 \
     WEB_CONCURRENCY=2
 EXPOSE 8000
-CMD gunicorn --bind 0.0.0.0:${PORT} --timeout 60 app:app
+# Generous timeout: on very small instances (e.g. 0.1 CPU) one label can take 10-20 s,
+# and queued batch requests must not be cut off.
+CMD gunicorn --bind 0.0.0.0:${PORT} --timeout 300 app:app

@@ -45,7 +45,9 @@ def samples(name: str):
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    # "workers" lets the batch page send only as many labels at once as the
+    # server can process, so small instances aren't flooded.
+    return {"status": "ok", "workers": max(1, int(os.environ.get("WEB_CONCURRENCY", "2")))}
 
 
 @app.post("/api/verify")
