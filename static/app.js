@@ -8,7 +8,9 @@ const STATUS = {
   fail:   { word: "Does not match", icon: "✕", verdict: "Label does not match",           sub: "One or more checks failed. See below." },
 };
 const FIELDS = ["beverage_type", "brand_name", "class_type", "alcohol_content", "net_contents", "bottler", "country_of_origin"];
-const CONCURRENCY = 4;
+const MAX_CONCURRENCY = 4;
+const RETRY_DELAYS_MS = [3000, 8000]; // for temporary server errors (busy or restarting)
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 const $ = (sel, root = document) => root.querySelector(sel);
 
 /* ---------------- Tabs ---------------- */
@@ -32,7 +34,26 @@ tabs.forEach((tab, i) => {
 });
 
 /* ---------------- API ---------------- */
+class TemporaryError extends Error {}
+
+/** Check one label, retrying automatically if the server is briefly busy or restarting. */
 async function verifyLabel(file, fields, signal) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await verifyOnce(file, fields, signal);
+    } catch (err) {
+      if (!(err instanceof TemporaryError) || attempt >= RETRY_DELAYS_MS.length) {
+        throw err instanceof TemporaryError
+          ? new Error("The server was too busy to check this label. Try it again in a minute.")
+          : err;
+      }
+      await sleep(RETRY_DELAYS_MS[attempt]);
+      if (signal && signal.aborted) throw new DOMException("Aborted", "AbortError");
+    }
+  }
+}
+
+async function verifyOnce(file, fields, signal) {
   const body = new FormData();
   body.append("image", file, file.name);
   FIELDS.forEach(k => body.append(k, fields[k] || ""));
@@ -41,8 +62,9 @@ async function verifyLabel(file, fields, signal) {
     res = await fetch("/api/verify", { method: "POST", body, signal });
   } catch (err) {
     if (err.name === "AbortError") throw err;
-    throw new Error("Couldn't reach the server. Check your connection and try again.");
+    throw new TemporaryError("network");
   }
+  if ([502, 503, 504].includes(res.status)) throw new TemporaryError(String(res.status));
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `The server returned an error (${res.status}).`);
   return data;
@@ -340,7 +362,14 @@ batchRun.addEventListener("click", async () => {
       renderBatchTable();
     }
   }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  // Send only as many labels at once as the server has workers (plus one waiting),
+  // so a small server isn't flooded with requests it can't answer in time.
+  let concurrency = 2;
+  try {
+    const h = await (await fetch("/health", { signal })).json();
+    concurrency = Math.min(MAX_CONCURRENCY, (h.workers || 1) + 1);
+  } catch { /* keep the default */ }
+  await Promise.all(Array.from({ length: concurrency }, worker));
   if (signal.aborted) $("#batch-progress-text").textContent = `Stopped after ${done} of ${total}.`;
   $("#batch-stop").hidden = true;
   batchRun.disabled = false;
